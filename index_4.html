@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clínica Blanc — Estética Facial & Odontología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- GSAP for premium scroll animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto;font-size:16px} /* auto — GSAP controls scroll */
+body{font-family:'Jost',sans-serif;font-weight:300;background:#0e0a06;color:#2c1f14;overflow-x:hidden;cursor:none}
+
+/* ── CURSOR ── */
+.cur{position:fixed;width:8px;height:8px;background:#c9a882;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s,background .25s,opacity .3s}
+.cur-r{position:fixed;width:38px;height:38px;border:1px solid rgba(201,168,130,.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+.cur.hv{width:16px;height:16px;background:#9a7248}
+.cur-r.hv{width:56px;height:56px;border-color:rgba(154,114,72,.28)}
+
+/* ── VARIABLES ── */
+:root{
+  --cm:#c9a882;--cmd:#9a7248;--cml:#e8d5bc;--cmxl:#f5ede0;
+  --cr:#faf8f5;--ci:#f2ece3;--cl:#ede4d8;
+  --cb:#2c1f14;--cbm:#6b4f38;--cbl:#a8886a;--cw:#fff;
+  --serif:'Cormorant Garamond',serif;--sans:'Jost',sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);--ease2:cubic-bezier(.76,0,.24,1);
+}
+
+/* ── PAGE LOADER ── */
+#loader{
+  position:fixed;inset:0;z-index:1000;
+  background:#0e0a06;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.loader-logo{
+  font-family:var(--serif);font-size:3rem;letter-spacing:.3em;
+  color:var(--cml);opacity:0;
+}
+.loader-line{
+  position:absolute;bottom:0;left:0;height:2px;
+  background:var(--cm);width:0%;
+  transition:none;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:0 5vw;display:flex;align-items:center;justify-content:space-between;
+  height:72px;
+  transition:background .5s,box-shadow .5s,height .4s;
+}
+nav.sc{background:rgba(250,248,245,.96);backdrop-filter:blur(16px);box-shadow:0 1px 0 rgba(201,168,130,.15);height:60px}
+.nl{font-family:var(--serif);font-size:1.7rem;font-weight:400;letter-spacing:.18em;color:var(--cr);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .4s}
+nav.sc .nl{color:var(--cb)}
+.nd{width:6px;height:6px;background:var(--cm);border-radius:50%;display:inline-block}
+.nlinks{display:flex;gap:40px;list-style:none;align-items:center}
+.nlinks a{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(250,248,245,.7);text-decoration:none;position:relative;transition:color .3s}
+nav.sc .nlinks a{color:var(--cbm)}
+.nlinks a::after{content:'';position:absolute;bottom:-4px;left:0;right:100%;height:1px;background:var(--cm);transition:right .35s var(--ease)}
+.nlinks a:hover::after{right:0}
+.nlinks a:hover{color:var(--cw)}
+nav.sc .nlinks a:hover{color:var(--cb)}
+.ncta{background:rgba(255,255,255,.12)!important;color:var(--cw)!important;padding:9px 22px!important;border-radius:40px!important;border:1px solid rgba(255,255,255,.2)!important;letter-spacing:.1em!important;transition:background .3s,border-color .3s,transform .2s!important;backdrop-filter:blur(4px)}
+nav.sc .ncta{background:var(--cb)!important;border-color:transparent!important}
+.ncta::after{display:none!important}
+.ncta:hover{background:var(--cm)!important;border-color:transparent!important;transform:translateY(-1px)!important}
+.nhb{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:none;padding:4px}
+.nhb span{display:block;width:24px;height:1.5px;background:var(--cw);transition:transform .3s,opacity .3s,background .3s}
+nav.sc .nhb span{background:var(--cb)}
+.nov{position:fixed;inset:0;z-index:190;background:var(--cr);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;opacity:0;pointer-events:none;transition:opacity .4s}
+.nov.open{opacity:1;pointer-events:all}
+.nov a{font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--cb);text-decoration:none;transition:color .3s}
+.nov a:hover{color:var(--cm)}
+
+/* ════════════════════════════════════════
+   HERO — full bleed, grid layout (no overlap)
+════════════════════════════════════════ */
+#hero{
+  position:relative;
+  width:100%;
+  min-height:100vh;
+  overflow:hidden;
+  background:#0e0a06;
+  /* 3-row grid: nav spacer | content | stats */
+  display:grid;
+  grid-template-rows: 72px 1fr auto;
+  grid-template-columns: 1fr;
+}
+.hi{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  overflow:hidden;
+  z-index:0;
+}
+.hi img{
+  width:100%;height:100%;
+  object-fit:cover;
+  object-position:65% center;
+  transform:scale(1.12);
+  transform-origin:center center;
+  will-change:transform;
+  animation:heroZoom 6s cubic-bezier(.25,.46,.45,.94) 0.8s forwards;
+}
+.h-ov{
+  position:absolute;inset:0;z-index:1;
+  background:
+    linear-gradient(to right, rgba(14,10,6,.84) 0%, rgba(14,10,6,.58) 36%, rgba(14,10,6,.2) 62%, rgba(14,10,6,.06) 100%),
+    linear-gradient(to top, rgba(14,10,6,.6) 0%, transparent 45%);
+}
+/* row 1: nav spacer */
+.h-nav-space{ grid-row:1; z-index:2; }
+/* row 2: main content — vertically centered in remaining space */
+.h-content{
+  grid-row:2;
+  z-index:2;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  padding:40px 10vw 32px;
+}
+.h-tag{
+  font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--cm);margin-bottom:24px;
+  opacity:0;
+  animation:hfu .9s var(--ease) 2.2s forwards;
+}
+.h-title{
+  font-family:var(--serif);
+  font-size:clamp(2.8rem,5.5vw,5.8rem);
+  font-weight:300;line-height:1.06;
+  color:var(--cr);
+  margin-bottom:24px;max-width:620px;
+  opacity:0;
+  animation:hfu 1.2s var(--ease) 2.5s forwards;
+}
+.h-title em{font-style:italic;color:var(--cm)}
+.h-sub{
+  font-size:.97rem;line-height:1.75;
+  color:rgba(250,248,245,.62);
+  max-width:380px;margin-bottom:40px;
+  opacity:0;
+  animation:hfu .9s var(--ease) 2.9s forwards;
+}
+.h-btns{
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+  opacity:0;
+  animation:hfu .9s var(--ease) 3.1s forwards;
+}
+.btn-light{
+  background:var(--cw);color:var(--cb);
+  padding:13px 28px;border-radius:40px;
+  font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;
+  text-decoration:none;transition:background .3s,transform .25s;
+  display:inline-block;font-family:var(--sans);white-space:nowrap;
+}
+.btn-light:hover{background:var(--cml);transform:translateY(-2px)}
+.btn-ghost{
+  color:rgba(250,248,245,.8);font-size:.8rem;letter-spacing:.1em;
+  text-decoration:none;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+  transition:color .3s,gap .3s;white-space:nowrap;
+}
+.btn-ghost svg{transition:transform .35s}
+.btn-ghost:hover{color:var(--cw);gap:12px}
+.btn-ghost:hover svg{transform:translateX(4px)}
+/* row 3: stats bar — always below content, never overlaps */
+.h-stats{
+  grid-row:3;
+  z-index:2;
+  display:flex;gap:0;
+  padding:24px 10vw 36px;
+  opacity:0;
+  animation:hfu .9s var(--ease) 3.4s forwards;
+  border-top:1px solid rgba(201,168,130,.12);
+}
+.h-stat{
+  flex:1;padding:0 24px 0 0;
+  border-right:1px solid rgba(201,168,130,.12);
+  margin-right:24px;
+}
+.h-stat:last-child{border-right:none;margin-right:0}
+.h-sn{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--cw);line-height:1}
+.h-sl{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(250,248,245,.42);margin-top:4px}
+/* badge — absolute only on large screens where there's room */
+.h-badge{
+  position:absolute;bottom:48px;right:6vw;z-index:3;
+  background:rgba(250,248,245,.08);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(201,168,130,.22);
+  border-radius:16px;padding:16px 22px;
+  opacity:0;
+  animation:hfu .8s var(--ease) 3.6s forwards;
+}
+.h-badge-l{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cm);margin-bottom:5px}
+.h-badge-t{font-family:var(--serif);font-size:1rem;color:var(--cw);line-height:1.3}
+/* scroll indicator */
+.h-si{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;z-index:3;
+  opacity:0;animation:hfu 1s ease 3.8s forwards;
+}
+.h-si span{font-size:.63rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(250,248,245,.35)}
+.h-si-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(201,168,130,.55),transparent);animation:sla 2s ease-in-out infinite}
+/* hide badge + scroll on small screens to avoid clutter */
+@media(max-width:1100px){.h-badge{display:none}}
+@media(max-width:700px){.h-si{display:none}.h-stats{padding:20px 5vw 28px;gap:0}.h-stat{padding:0 16px 0 0;margin-right:16px}}
+
+@keyframes heroZoom{from{transform:scale(1.12)}to{transform:scale(1)}}
+@keyframes hfu{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes sla{0%,100%{opacity:0;transform:scaleY(0);transform-origin:top}55%{opacity:1;transform:scaleY(1)}}
+
+/* ════════════════════════════════════════
+   SECTION TRANSITIONS — overlap + clip
+   Each section sits above the previous
+════════════════════════════════════════ */
+.section-wrap{
+  position:relative;
+  z-index:1; /* JS will set individual z-indexes */
+}
+
+/* Clip reveal mask — sections enter with clip-path */
+.clip-enter{
+  clip-path: inset(8% 0 0 0);
+  opacity:0;
+  transition: clip-path .0s, opacity .0s; /* GSAP controls this */
+}
+
+/* ── MARQUEE ── */
+.mq{background:var(--cb);padding:16px 0;overflow:hidden;position:relative;z-index:2}
+.mq-t{display:flex;gap:60px;animation:mqr 22s linear infinite;width:max-content}
+.mq-t span{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--cml);white-space:nowrap}
+.mq-t .d{width:4px;height:4px;background:var(--cm);border-radius:50%;align-self:center;flex-shrink:0}
+@keyframes mqr{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── ABOUT ── */
+#about{background:var(--cw);padding:120px 10vw;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.a-imgs{position:relative;height:560px}
+.a-main{position:absolute;right:0;top:0;width:72%;height:80%;border-radius:4px 4px 60px 4px;overflow:hidden}
+.a-main img{width:100%;height:100%;object-fit:cover;transition:transform 6s ease}
+.a-main:hover img{transform:scale(1.04)}
+.a-sec{position:absolute;left:0;bottom:0;width:52%;height:56%;border-radius:4px 4px 4px 60px;overflow:hidden;border:6px solid var(--cw)}
+.a-sec img{width:100%;height:100%;object-fit:cover}
+.a-acc{position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:90px;height:90px;border:1px solid var(--cml);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:var(--cw)}
+.a-acc-n{font-family:var(--serif);font-size:1.6rem;color:var(--cmd)}
+.a-acc-l{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cbl);line-height:1.3}
+.a-txt p{font-size:1rem;line-height:1.8;color:var(--cbm);margin-bottom:20px}
+.ey{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cm);margin-bottom:16px;display:block}
+.st{font-family:var(--serif);font-size:clamp(2rem,4vw,3.4rem);font-weight:300;line-height:1.15;color:var(--cb)}
+.st em{font-style:italic;color:var(--cmd)}
+.a-txt .st{margin-bottom:28px}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px}
+.pill{background:var(--ci);border:1px solid var(--cl);border-radius:30px;padding:7px 18px;font-size:.75rem;letter-spacing:.08em;color:var(--cbm)}
+
+/* ══════════════════════════════════════════
+   SERVICES CAROUSEL — premium immersive
+══════════════════════════════════════════ */
+#services{
+  background:#120d07;
+  padding:110px 0 0;
+  position:relative;overflow:hidden;
+}
+#services::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 55% at 80% 10%,rgba(201,168,130,.09) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 60% at 8% 88%,rgba(154,114,72,.07) 0%,transparent 55%);
+}
+.sv-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,168,130,.04);pointer-events:none;z-index:0}
+.sv-r1{width:900px;height:900px;right:-320px;top:-320px}
+.sv-r2{width:600px;height:600px;left:-220px;bottom:-220px}
+
+/* header */
+.sv-in{position:relative;z-index:1;padding:0 6vw}
+.sv-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:64px;gap:24px;flex-wrap:wrap}
+#services .ey{color:var(--cm)}
+#services .st{color:#f5ede0}
+#services .st em{color:var(--cm)}
+
+/* category filter + nav controls together */
+.sv-controls{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.sv-tabs{display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,130,.16);border-radius:40px;padding:4px}
+.sv-tab{padding:8px 20px;border-radius:30px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;cursor:none;color:rgba(245,237,224,.38);transition:background .3s,color .3s}
+.sv-tab.act{background:var(--cm);color:#fff}
+
+/* arrow nav — small arrows in header (fallback / always visible) */
+.sv-arrows{display:flex;gap:10px}
+.sv-arr{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,130,.18);color:rgba(245,237,224,.6);cursor:none;display:flex;align-items:center;justify-content:center;transition:background .3s,border-color .3s,color .3s,transform .25s}
+.sv-arr:hover{background:rgba(201,168,130,.18);border-color:rgba(201,168,130,.4);color:var(--cml);transform:scale(1.08)}
+.sv-arr svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sv-arr:disabled{opacity:.25;pointer-events:none}
+
+/* progress bar */
+.sv-progress{height:1px;background:rgba(201,168,130,.1);margin:0 6vw;position:relative;overflow:hidden}
+.sv-progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--cm);width:0%;transition:width .55s var(--ease)}
+
+/* ── CAROUSEL WRAPPER — contains viewport + hover zones ── */
+.sv-carousel-wrap{
+  position:relative;
+  /* edge fade masks — CSS only, no DOM elements */
+}
+
+/* left edge fade */
+.sv-carousel-wrap::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:160px;z-index:10;pointer-events:none;
+  background:linear-gradient(to right,#120d07 0%,rgba(18,13,7,.6) 40%,transparent 100%);
+  transition:opacity .4s;
+  opacity:1;
+}
+/* right edge fade */
+.sv-carousel-wrap::after{
+  content:'';
+  position:absolute;right:0;top:0;bottom:0;
+  width:160px;z-index:10;pointer-events:none;
+  background:linear-gradient(to left,#120d07 0%,rgba(18,13,7,.6) 40%,transparent 100%);
+  transition:opacity .4s;
+  opacity:1;
+}
+/* fade out left mask when at start */
+.sv-carousel-wrap.at-start::before{opacity:0}
+/* fade out right mask when at end */
+.sv-carousel-wrap.at-end::after{opacity:0}
+
+/* ── HOVER ZONES — large invisible clickable areas at each edge ── */
+.sv-zone{
+  position:absolute;top:0;bottom:0;z-index:20;
+  width:140px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;
+}
+.sv-zone-left{left:0}
+.sv-zone-right{right:0}
+
+/* big floating arrow that appears on hover */
+.sv-zone-btn{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(18,13,7,.65);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(201,168,130,.28);
+  color:var(--cml);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;
+  transform:scale(.7);
+  transition:opacity .35s var(--ease),transform .35s var(--ease),background .25s,border-color .25s;
+  pointer-events:none; /* zone handles clicks */
+}
+.sv-zone-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.sv-zone:hover .sv-zone-btn{
+  opacity:1;
+  transform:scale(1);
+}
+.sv-zone:hover{
+  /* subtle background hint on hover */
+  background:linear-gradient(to right,rgba(201,168,130,.04),transparent);
+}
+.sv-zone-right:hover{
+  background:linear-gradient(to left,rgba(201,168,130,.04),transparent);
+}
+
+/* VIEWPORT — no overflow clip so edge fades look good */
+.sv-viewport{
+  overflow:hidden;
+  padding:32px 6vw 60px;
+  cursor:grab;
+  position:relative;
+  z-index:5;
+}
+.sv-viewport.dragging{cursor:grabbing}
+.sv-track{
+  display:flex;
+  gap:20px;
+  will-change:transform;
+}
+
+/* CARD — premium redesign */
+.sv-card{
+  flex:0 0 340px;
+  background:rgba(255,255,255,.038);
+  border:1px solid rgba(201,168,130,.1);
+  border-radius:24px;
+  padding:0;
+  position:relative;overflow:hidden;
+  cursor:none;
+  transition:border-color .5s,box-shadow .5s;
+  display:flex;flex-direction:column;
+}
+.sv-card::before{
+  content:'';position:absolute;inset:0;border-radius:24px;
+  background:radial-gradient(ellipse at 15% 10%,rgba(201,168,130,.15),transparent 50%);
+  opacity:0;transition:opacity .5s;pointer-events:none;z-index:0;
+}
+.sv-card.active-card{
+  border-color:rgba(201,168,130,.3);
+  box-shadow:0 32px 64px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,130,.08);
+}
+.sv-card.active-card::before{opacity:1}
+
+/* card top: number + icon side by side */
+.sv-card-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:28px 28px 0;
+  position:relative;z-index:1;
+}
+.sv-num{
+  font-family:var(--serif);font-size:3.5rem;font-weight:300;
+  color:rgba(201,168,130,.12);line-height:1;
+  transition:color .5s;
+}
+.sv-card.active-card .sv-num{color:rgba(201,168,130,.22)}
+.sv-ico{
+  width:52px;height:52px;border-radius:14px;
+  background:rgba(201,168,130,.08);
+  border:1px solid rgba(201,168,130,.14);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .5s,transform .5s,border-color .5s;
+}
+.sv-card.active-card .sv-ico{
+  background:rgba(201,168,130,.18);
+  border-color:rgba(201,168,130,.3);
+  transform:scale(1.06) rotate(-4deg);
+}
+.sv-ico svg{width:23px;height:23px;stroke:var(--cm);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* card body */
+.sv-card-body{
+  padding:20px 28px 28px;
+  position:relative;z-index:1;
+  flex:1;display:flex;flex-direction:column;
+}
+/* colored accent line */
+.sv-card-body::before{
+  content:'';display:block;width:28px;height:1px;
+  background:var(--cm);opacity:.35;margin-bottom:18px;
+  transition:width .4s var(--ease),opacity .4s;
+}
+.sv-card.active-card .sv-card-body::before{width:44px;opacity:.65}
+
+.sv-title{font-family:var(--serif);font-size:1.3rem;font-weight:400;color:#f5ede0;margin-bottom:12px;transition:color .3s}
+.sv-card.active-card .sv-title{color:#fff}
+.sv-desc{font-size:.85rem;line-height:1.74;color:rgba(245,237,224,.42);flex:1;transition:color .4s}
+.sv-card.active-card .sv-desc{color:rgba(245,237,224,.58)}
+.sv-lnk{
+  display:inline-flex;align-items:center;gap:6px;margin-top:24px;
+  font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cm);text-decoration:none;
+  transition:gap .3s,color .3s,opacity .3s;
+  opacity:.6;
+}
+.sv-card.active-card .sv-lnk{opacity:1}
+.sv-lnk:hover{gap:11px;color:#dfc49e;opacity:1}
+
+/* category tag on card */
+.sv-cat-tag{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(201,168,130,.3);white-space:nowrap;
+}
+
+/* dots */
+.sv-dots{display:flex;justify-content:center;gap:8px;padding:0 0 48px}
+.sv-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(201,168,130,.2);border:none;cursor:none;
+  transition:background .3s,transform .3s,width .3s;
+}
+.sv-dot.act{background:var(--cm);width:20px;border-radius:3px}
+
+/* ── TEAM ── */
+#team{background:var(--cb);padding:110px 5vw}
+#team .ey{color:var(--cm)}
+#team .st{color:var(--cr)}
+.tm-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:64px}
+.tm-sub{font-size:.92rem;line-height:1.7;color:rgba(250,248,245,.4);max-width:320px;margin-top:14px}
+.tm-fil{display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,130,.18);border-radius:40px;padding:4px}
+.tm-fb{padding:8px 20px;border-radius:30px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;cursor:none;color:rgba(250,248,245,.4);transition:background .3s,color .3s}
+.tm-fb.act{background:var(--cm);color:#fff}
+.tm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.tc{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,130,.11);border-radius:20px;overflow:hidden;transition:transform .45s var(--ease),border-color .4s,background .4s;cursor:none}
+.tc:hover{transform:translateY(-8px);border-color:rgba(201,168,130,.33);background:rgba(255,255,255,.07)}
+.tc-photo{width:100%;height:250px;overflow:hidden;background:rgba(201,168,130,.08);position:relative;display:flex;align-items:center;justify-content:center}
+.tc-photo img{width:100%;height:100%;object-fit:cover;object-position:center top;filter:grayscale(18%);transition:filter .5s,transform .6s}
+.tc:hover .tc-photo img{filter:grayscale(0%);transform:scale(1.05)}
+.tc-ini{font-family:var(--serif);font-size:4.5rem;color:var(--cm);opacity:.26}
+.tc-badge{position:absolute;bottom:10px;left:10px;background:rgba(44,31,20,.8);backdrop-filter:blur(6px);border:1px solid rgba(201,168,130,.2);border-radius:20px;padding:4px 12px;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cml)}
+.tc-info{padding:20px 20px 24px}
+.tc-name{font-family:var(--serif);font-size:1.15rem;color:var(--cr);margin-bottom:4px}
+.tc-role{font-size:.73rem;letter-spacing:.08em;color:rgba(250,248,245,.35);margin-bottom:16px;text-transform:uppercase}
+.tc-btn{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cm);background:none;border:none;cursor:none;padding:0;transition:gap .3s,color .3s}
+.tc-btn:hover{gap:10px;color:#dfc49e}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:500;background:rgba(14,10,6,.8);backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .4s;display:flex;align-items:center;justify-content:center;padding:24px}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--cb);border:1px solid rgba(201,168,130,.16);border-radius:28px;max-width:860px;width:100%;max-height:90vh;overflow-y:auto;transform:translateY(36px) scale(.96);transition:transform .5s var(--ease),opacity .4s;opacity:0;position:relative}
+.modal-bg.open .modal{transform:none;opacity:1}
+.mc{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(201,168,130,.15);color:rgba(250,248,245,.5);font-size:1rem;cursor:none;display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s;z-index:2}
+.mc:hover{background:rgba(255,255,255,.13);color:var(--cr)}
+.m-in{display:grid;grid-template-columns:260px 1fr;gap:0}
+.m-ph{position:relative;overflow:hidden;border-radius:28px 0 0 28px;min-height:460px;background:rgba(201,168,130,.08);display:flex;align-items:center;justify-content:center}
+.m-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.m-pg{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,10,6,.82) 0%,transparent 45%)}
+.m-pi{font-family:var(--serif);font-size:6rem;color:var(--cm);opacity:.2;position:relative;z-index:1}
+.m-bd{padding:48px 44px 44px;display:flex;flex-direction:column;justify-content:center}
+.m-tag{font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;color:var(--cm);margin-bottom:10px}
+.m-nm{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--cr);line-height:1.1;margin-bottom:6px}
+.m-rl{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(250,248,245,.33);margin-bottom:26px}
+.m-dv{width:36px;height:1px;background:var(--cm);opacity:.42;margin-bottom:22px}
+.m-bio{font-size:.91rem;line-height:1.84;color:rgba(250,248,245,.56);margin-bottom:26px}
+.m-crs{display:flex;flex-direction:column;gap:9px;margin-bottom:32px}
+.m-cr{display:flex;align-items:flex-start;gap:10px;font-size:.82rem;color:rgba(250,248,245,.44);line-height:1.5}
+.m-cr::before{content:'—';color:var(--cm);opacity:.5;flex-shrink:0;margin-top:2px}
+.m-bk{display:inline-flex;align-items:center;gap:8px;background:var(--cm);color:#fff;padding:12px 28px;border-radius:40px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;align-self:flex-start;transition:background .3s,transform .25s}
+.m-bk:hover{background:var(--cmd);transform:translateY(-2px)}
+
+/* ── TESTIMONIALS ── */
+#testimonials{background:var(--ci);padding:110px 5vw}
+.tst-hdr{text-align:center;margin-bottom:64px}
+.tst-wrap{overflow:hidden}
+.tst-track{display:flex;gap:24px;transition:transform .75s var(--ease)}
+.tst-card{flex:0 0 calc(33.333% - 16px);background:var(--cw);border:1px solid var(--cl);border-radius:24px;padding:40px 36px}
+.ts{display:flex;gap:3px;margin-bottom:20px;color:var(--cm);font-size:1rem}
+.tt{font-family:var(--serif);font-size:1.15rem;font-weight:300;line-height:1.6;color:var(--cb);margin-bottom:28px;font-style:italic}
+.ta{display:flex;align-items:center;gap:12px}
+.tav{width:44px;height:44px;border-radius:50%;background:var(--cl);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1rem;color:var(--cbm);flex-shrink:0}
+.tn{font-size:.9rem;font-weight:400;color:var(--cb)}
+.tsv{font-size:.75rem;color:var(--cbl);margin-top:2px}
+.tst-nav{display:flex;justify-content:center;gap:12px;margin-top:40px}
+.td{width:8px;height:8px;border-radius:50%;background:var(--cl);border:none;cursor:none;transition:background .3s,transform .3s}
+.td.act{background:var(--cm);transform:scale(1.3)}
+
+/* ── BOOKING ── */
+#booking{background:var(--cw);padding:110px 10vw;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.bk-t .st{margin-bottom:20px}
+.bk-t p{font-size:.95rem;line-height:1.8;color:var(--cbm);margin-bottom:32px}
+.bk-steps{display:flex;flex-direction:column}
+.bk-step{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--cl)}
+.bk-step:last-child{border-bottom:none}
+.sn{width:36px;height:36px;border-radius:50%;border:1px solid var(--cml);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1rem;color:var(--cmd);flex-shrink:0}
+.s-tt{font-size:.9rem;font-weight:500;color:var(--cb);margin-bottom:4px}
+.s-ds{font-size:.83rem;line-height:1.6;color:var(--cbl)}
+.bk-form{background:var(--cr);border:1px solid var(--cl);border-radius:28px;padding:40px}
+.bf-title{font-family:var(--serif);font-size:1.5rem;color:var(--cb);margin-bottom:8px}
+.bf-sub{font-size:.83rem;color:var(--cbl);margin-bottom:28px;line-height:1.5}
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cbm);margin-bottom:7px}
+.fi,.fs{width:100%;padding:12px 16px;border:1px solid var(--cl);border-radius:10px;background:var(--cw);font-family:var(--sans);font-size:.9rem;color:var(--cb);transition:border-color .3s;outline:none;appearance:none}
+.fi:focus,.fs:focus{border-color:var(--cm)}
+.fsw{position:relative}
+.fsw::after{content:'↓';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--cbl);pointer-events:none;font-size:.8rem}
+.fb{width:100%;padding:14px;background:var(--cb);color:var(--cr);border:none;border-radius:40px;cursor:none;font-family:var(--sans);font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;margin-top:8px;transition:background .3s,transform .25s}
+.fb:hover{background:var(--cmd);transform:translateY(-1px)}
+
+/* ── GIFT CARD ── */
+#giftcard{background:var(--cb);padding:90px 10vw;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.gf-t .ey{color:var(--cm)}
+.gf-t .st{color:var(--cr);margin-bottom:20px}
+.gf-t p{font-size:.95rem;line-height:1.8;color:rgba(250,248,245,.52);margin-bottom:12px}
+.gf-t strong{color:rgba(250,248,245,.78);font-weight:400}
+.gf-btn{display:inline-block;margin-top:28px;background:var(--cm);color:#fff;padding:14px 32px;border-radius:40px;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:background .3s,transform .25s}
+.gf-btn:hover{background:var(--cmd);transform:translateY(-2px)}
+.gf-vis{perspective:1000px}
+.gf-card{background:linear-gradient(135deg,#3a2a1e,#5a4030 50%,#3a2a1e);border-radius:20px;padding:40px;position:relative;overflow:hidden;transition:transform .6s var(--ease);transform-style:preserve-3d;border:1px solid rgba(201,168,130,.16)}
+.gf-vis:hover .gf-card{transform:rotateY(-8deg) rotateX(4deg)}
+.gf-shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(201,168,130,.1) 50%,transparent 60%);transition:transform .6s}
+.gf-vis:hover .gf-shine{transform:translateX(60px)}
+.gc-logo{font-family:var(--serif);font-size:1.5rem;letter-spacing:.2em;color:var(--cml);margin-bottom:40px}
+.gc-amt{font-family:var(--serif);font-size:3rem;color:var(--cr);font-weight:300}
+.gc-amt span{font-size:1.2rem;vertical-align:super;margin-right:4px}
+.gc-lbl{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cm);margin-top:8px}
+.gc-bot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:40px}
+.gc-val{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(201,168,130,.4)}
+.gc-dots{display:flex;gap:6px}
+.gc-dot{width:28px;height:28px;border-radius:50%;background:rgba(201,168,130,.1);border:1px solid rgba(201,168,130,.17)}
+
+/* ── CONTACT ── */
+#contact{background:var(--cr);padding:90px 5vw;text-align:center}
+.ct-in{max-width:640px;margin:0 auto}
+.ct-in .st{margin-bottom:16px}
+.ct-sub{font-size:1rem;line-height:1.7;color:var(--cbm);margin-bottom:48px}
+.ct-ch{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.ct-a{display:flex;align-items:center;gap:12px;background:var(--cw);border:1px solid var(--cl);border-radius:16px;padding:16px 24px;text-decoration:none;transition:transform .35s,border-color .35s,box-shadow .35s}
+.ct-a:hover{transform:translateY(-5px);border-color:var(--cml);box-shadow:0 14px 32px rgba(44,31,20,.08)}
+.ct-ico{width:40px;height:40px;border-radius:10px;background:var(--ci);display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.ct-lbl{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cbl)}
+.ct-val{font-size:.9rem;color:var(--cb);margin-top:2px}
+
+/* ── FOOTER ── */
+footer{background:var(--cb);padding:60px 5vw 32px}
+.ft-in{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.ft-logo{font-family:var(--serif);font-size:1.8rem;color:var(--cr);letter-spacing:.18em;margin-bottom:16px;display:block}
+.ft-in>div:first-child p{font-size:.85rem;line-height:1.7;color:rgba(250,248,245,.3);max-width:280px}
+.ft-col h4{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cm);margin-bottom:20px}
+.ft-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ft-col ul a{font-size:.85rem;color:rgba(250,248,245,.34);text-decoration:none;transition:color .3s}
+.ft-col ul a:hover{color:var(--cml)}
+.ft-bot{border-top:1px solid rgba(201,168,130,.1);padding-top:24px;display:flex;justify-content:space-between;align-items:center}
+.ft-copy{font-size:.75rem;color:rgba(250,248,245,.18)}
+.ft-soc{display:flex;gap:14px}
+.ft-soc a{width:36px;height:36px;border-radius:50%;border:1px solid rgba(201,168,130,.16);display:flex;align-items:center;justify-content:center;color:rgba(250,248,245,.34);text-decoration:none;font-size:.7rem;transition:border-color .3s,color .3s}
+.ft-soc a:hover{border-color:var(--cm);color:var(--cm)}
+
+/* ── WA FLOAT ── */
+.wa{position:fixed;bottom:32px;right:32px;z-index:300}
+.wa-b{width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.35);animation:wap 2.5s ease-in-out infinite;transition:transform .3s}
+.wa-b:hover{transform:scale(1.1)}
+.wa-b svg{width:28px;height:28px;fill:#fff}
+@keyframes wap{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.35)}50%{box-shadow:0 4px 42px rgba(37,211,102,.55),0 0 0 12px rgba(37,211,102,.07)}}
+
+/* ── SECTION DIVIDER — wave transition between bg colors ── */
+.wave-top{
+  position:absolute;top:-1px;left:0;right:0;z-index:1;
+  pointer-events:none;overflow:hidden;line-height:0;
+}
+.wave-top svg{display:block;width:100%;height:60px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  #hero .h-content{padding:0 6vw;padding-top:72px}
+  #about{grid-template-columns:1fr;padding:80px 5vw;gap:40px}
+  .a-imgs{height:360px}
+  #booking{grid-template-columns:1fr;padding:80px 5vw;gap:48px}
+  #giftcard{grid-template-columns:1fr;padding:80px 5vw;gap:48px}
+  .ft-in{grid-template-columns:1fr;gap:32px}
+  .sv-hdr{flex-direction:column;align-items:flex-start;gap:24px}
+  .tm-hdr{flex-direction:column;align-items:flex-start;gap:20px}
+  .tst-card{flex:0 0 85vw}
+  .nlinks{display:none}
+  .nhb{display:flex}
+  body{cursor:auto}
+  .cur,.cur-r{display:none}
+  .m-in{grid-template-columns:1fr}
+  .m-ph{border-radius:28px 28px 0 0;min-height:280px}
+  .h-stats{left:6vw}
+  .h-badge{right:4vw}
+}
+@media(max-width:600px){
+  .sv-grid{grid-template-columns:1fr}
+  .h-stats{gap:28px;bottom:100px}
+  .h-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div id="loader">
+  <div class="loader-logo" id="llogo">BLANC</div>
+  <div class="loader-line" id="lline"></div>
+</div>
+
+<!-- CURSOR -->
+<div class="cur" id="C"></div>
+<div class="cur-r" id="CR"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nl" id="navLogo">BLANC <span class="nd"></span></a>
+  <ul class="nlinks">
+    <li><a href="#about">La Clínica</a></li>
+    <li><a href="#services">Tratamientos</a></li>
+    <li><a href="#team">Equipo</a></li>
+    <li><a href="#testimonials">Testimonios</a></li>
+    <li><a href="#booking" class="ncta">Agendar</a></li>
+  </ul>
+  <button class="nhb" id="hb" aria-label="Menú"><span></span><span></span><span></span></button>
+</nav>
+<div class="nov" id="nov">
+  <a href="#about" class="nol">La Clínica</a>
+  <a href="#services" class="nol">Tratamientos</a>
+  <a href="#team" class="nol">Equipo</a>
+  <a href="#testimonials" class="nol">Testimonios</a>
+  <a href="#booking" class="nol">Agendar</a>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section id="hero">
+  <!-- background image (absolute, behind everything) -->
+  <div class="hi">
+    <img id="heroImg" src="https://www.clinicablanc.cl/wp-content/uploads/2023/03/esteticista-haciendo-relleno-inyeccion-clienta-scaled.jpg" alt="Tratamiento estético Clínica Blanc">
+  </div>
+  <div class="h-ov"></div>
+  <!-- row 1: nav height spacer -->
+  <div class="h-nav-space"></div>
+  <!-- row 2: main content -->
+  <div class="h-content">
+    <span class="h-tag">Estética Facial & Odontología · Santiago</span>
+    <h1 class="h-title">Tu mejor versión,<br>con manos <em>expertas.</em></h1>
+    <p class="h-sub">Centro integral de estética facial avanzada y odontología de especialidad. Tratamientos personalizados que realzan tu belleza natural.</p>
+    <div class="h-btns">
+      <a href="#booking" class="btn-light">Agendar evaluación</a>
+      <a href="#services" class="btn-ghost">Ver tratamientos
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+  <!-- row 3: stats — always below content in flow, never overlaps -->
+  <div class="h-stats">
+    <div class="h-stat"><div class="h-sn">15+</div><div class="h-sl">Años de experiencia</div></div>
+    <div class="h-stat"><div class="h-sn">5</div><div class="h-sl">Especialistas</div></div>
+    <div class="h-stat"><div class="h-sn">∞</div><div class="h-sl">Sonrisas logradas</div></div>
+  </div>
+  <!-- decorative elements (absolute, large screens only via CSS) -->
+  <div class="h-badge">
+    <div class="h-badge-l">Especialidad</div>
+    <div class="h-badge-t">Armonización Orofacial Avanzada</div>
+  </div>
+  <div class="h-si"><span>Scroll</span><div class="h-si-line"></div></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq section-wrap" id="smq">
+  <div class="mq-t">
+    <span>Ácido Hialurónico</span><div class="d"></div><span>Toxina Botulínica</span><div class="d"></div>
+    <span>Bioestimuladores</span><div class="d"></div><span>Adipoestructuración</span><div class="d"></div>
+    <span>Peelings Químicos</span><div class="d"></div><span>Implantología</span><div class="d"></div>
+    <span>Ortodoncia</span><div class="d"></div><span>Periodoncia</span><div class="d"></div>
+    <span>Limpieza Facial</span><div class="d"></div><span>Rehabilitación Oral</span><div class="d"></div>
+    <span>Ácido Hialurónico</span><div class="d"></div><span>Toxina Botulínica</span><div class="d"></div>
+    <span>Bioestimuladores</span><div class="d"></div><span>Adipoestructuración</span><div class="d"></div>
+    <span>Peelings Químicos</span><div class="d"></div><span>Implantología</span><div class="d"></div>
+    <span>Ortodoncia</span><div class="d"></div><span>Periodoncia</span><div class="d"></div>
+    <span>Limpieza Facial</span><div class="d"></div><span>Rehabilitación Oral</span><div class="d"></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about" class="section-wrap">
+  <div class="a-imgs" id="aImgs">
+    <div class="a-main"><img src="https://www.clinicablanc.cl/wp-content/uploads/2023/03/doctor-examinando-cara-mujer-tratamiento-cosmetico-683x1024.jpg" alt="Clínica"></div>
+    <div class="a-sec"><img src="https://www.clinicablanc.cl/wp-content/uploads/2023/04/mujer-spa-tratamiento-piel-681x1024.jpg" alt="Tratamiento"></div>
+    <div class="a-acc"><div class="a-acc-n">A+</div><div class="a-acc-l">Calidad garantizada</div></div>
+  </div>
+  <div class="a-txt" id="aTxt">
+    <span class="ey">Quiénes somos</span>
+    <h2 class="st">Un espacio donde la<br><em>ciencia y la belleza</em><br>se encuentran.</h2>
+    <p>Clínica Blanc es un centro integral especializado en estética facial avanzada y odontología de especialidad. Nuestro equipo combina experiencia, tecnología de vanguardia y un enfoque profundamente humano.</p>
+    <p>Nos diferencia la atención personalizada y empática. Cada plan de tratamiento se diseña a medida, respetando la armonía y la belleza natural de cada paciente.</p>
+    <div class="pills">
+      <span class="pill">Armonización Orofacial</span>
+      <span class="pill">Odontología de Especialidad</span>
+      <span class="pill">Estética Facial Avanzada</span>
+      <span class="pill">Certificaciones Internacionales</span>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES CAROUSEL -->
+<section id="services" class="section-wrap">
+  <div class="sv-ring sv-r1"></div><div class="sv-ring sv-r2"></div>
+  <div class="sv-in">
+    <div class="sv-hdr">
+      <div>
+        <span class="ey" id="svEy">Nuestros tratamientos</span>
+        <h2 class="st" id="svTitle">Servicios diseñados<br>para <em>tu bienestar.</em></h2>
+      </div>
+      <div class="sv-controls">
+        <div class="sv-tabs">
+          <button class="sv-tab act" data-f="all">Todos</button>
+          <button class="sv-tab" data-f="facial">Facial</button>
+          <button class="sv-tab" data-f="dental">Dental</button>
+        </div>
+        <div class="sv-arrows">
+          <button class="sv-arr" id="svPrev" aria-label="Anterior">
+            <svg viewBox="0 0 18 18"><path d="M11 14l-5-5 5-5"/></svg>
+          </button>
+          <button class="sv-arr" id="svNext" aria-label="Siguiente">
+            <svg viewBox="0 0 18 18"><path d="M7 4l5 5-5 5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- progress bar -->
+  <div class="sv-progress"><div class="sv-progress-fill" id="svFill"></div></div>
+
+  <!-- carousel wrap: contains edge fades + hover zones + viewport -->
+  <div class="sv-carousel-wrap at-start" id="svWrap">
+
+    <!-- LEFT hover zone -->
+    <div class="sv-zone sv-zone-left" id="svZoneL">
+      <div class="sv-zone-btn">
+        <svg viewBox="0 0 22 22"><path d="M13 17l-6-6 6-6"/></svg>
+      </div>
+    </div>
+
+    <!-- draggable viewport -->
+    <div class="sv-viewport" id="svViewport">
+    <div class="sv-track" id="svTrack">
+
+      <div class="sv-card active-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">01</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M13 3C13 3 5 12 5 17a8 8 0 0016 0C21 12 13 3 13 3z"/><path d="M9 18a4 4 0 004 3" opacity=".5"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Ácido Hialurónico</h3>
+          <p class="sv-desc">Restaura la hidratación y el volumen de tu piel. Resultados inmediatos que suavizan arrugas y líneas de expresión con efectos naturales y duraderos.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">02</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M13 2v4M13 20v4M2 13h4M20 13h4"/><path d="M6.3 6.3l2.8 2.8M16.9 16.9l2.8 2.8M6.3 19.7l2.8-2.8M16.9 9.1l2.8-2.8"/><circle cx="13" cy="13" r="3"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Bioestimuladores</h3>
+          <p class="sv-desc">Estimulan la producción natural de colágeno y elastina. Piel más tersa, firme y joven con resultados altamente personalizados y progresivos.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">03</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M16 4l6 6-2 2-6-6zM4 18l8-8M4 18v4h4L4 18z"/><path d="M14 8l4 4M8 14l2 2"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Toxina Botulínica</h3>
+          <p class="sv-desc">Suaviza líneas finas y arrugas relajando los músculos faciales. Resultado fresco y natural sin alterar tu expresión ni tu personalidad.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">04</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M6 20C6 20 8 10 18 6c0 0 2 10-8 14C10 20 8 20 6 20z"/><path d="M6 20l7-7"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Vitaminas & Nutrición</h3>
+          <p class="sv-desc">Tratamientos vitamínicos que aportan los nutrientes esenciales para una piel luminosa, hidratada y saludable desde adentro hacia afuera.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">05</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M3 13l10-6 10 6-10 6-10-6z"/><path d="M3 17l10 6 10-6M3 9l10 6 10-6"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Adipoestructuración</h3>
+          <p class="sv-desc">Rejuvenecimiento inteligente sin cirugía. Reposiciona los compartimentos grasos devolviendo la elasticidad y firmeza perdida de forma natural.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">06</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M4 9h12a3 3 0 100-6 3 3 0 010 6M4 14h16a3 3 0 110 6 3 3 0 010-6"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Peelings Químicos</h3>
+          <p class="sv-desc">Exfoliación profunda que renueva la piel eliminando células muertas. Textura más uniforme, luminosidad visible y tono homogéneo.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="facial">
+        <div class="sv-card-top">
+          <span class="sv-num">07</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><circle cx="13" cy="11" r="7"/><path d="M8 18C8 22 18 22 18 18"/><circle cx="10" cy="10" r="1" fill="var(--cm)" stroke="none"/><circle cx="16" cy="10" r="1" fill="var(--cm)" stroke="none"/><path d="M10 14c0 0 1.5 2 3 2s3-2 3-2" opacity=".7"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Limpieza Facial</h3>
+          <p class="sv-desc">Elimina impurezas, exceso de sebo y células muertas. Previene brotes de acné y mantiene la piel equilibrada y saludable.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="dental">
+        <div class="sv-card-top">
+          <span class="sv-num">08</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M9 4C6 4 4 6 4 9c0 4 2 7 4 13 .5 2 1.5 2 2 0l3-6 3 6c.5 2 1.5 2 2 0 2-6 4-9 4-13 0-3-2-5-5-5-2 0-3 1-4 1s-2-1-4-1z"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Odontología General</h3>
+          <p class="sv-desc">Cuidado integral de tu salud bucal con enfoque preventivo y estético. Diagnóstico y tratamiento para pacientes de todas las edades.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="dental">
+        <div class="sv-card-top">
+          <span class="sv-num">09</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M13 3v14M10 6h6M10 9h6M10 12h6"/><path d="M10 17c0 0-2 2-2 4s2 3 5 3 5-1 5-3-2-4-2-4"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Implantología</h3>
+          <p class="sv-desc">Implantes de titanio que reemplazan dientes perdidos con naturalidad. La solución más duradera y estética para restaurar tu sonrisa completa.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="dental">
+        <div class="sv-card-top">
+          <span class="sv-num">10</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><rect x="4" y="10" width="18" height="6" rx="3"/><path d="M8 10V8a2 2 0 014 0v2M14 10V8a2 2 0 014 0v2M8 16v2a2 2 0 004 0v-2M14 16v2a2 2 0 004 0v-2"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Ortodoncia</h3>
+          <p class="sv-desc">Corrección de irregularidades dentales y maxilofaciales. Sonrisa estética, mordida correcta y función oral óptima con tratamientos personalizados.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="dental">
+        <div class="sv-card-top">
+          <span class="sv-num">11</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M4 16c0 0 2-4 9-4s9 4 9 4M7 16c0 4 3 7 6 7s6-3 6-7"/><path d="M10 12c0-3 1-6 3-6s3 3 3 6" opacity=".6"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Periodoncia</h3>
+          <p class="sv-desc">Diagnóstico y tratamiento de enfermedades que afectan encías y hueso alveolar. La base de salud sobre la que construimos tu sonrisa duradera.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+      <div class="sv-card" data-cat="dental">
+        <div class="sv-card-top">
+          <span class="sv-num">12</span>
+          <div class="sv-ico"><svg viewBox="0 0 26 26"><path d="M5 20L7 10l6 6 6-6 2 10Z"/><path d="M5 20h16"/><circle cx="7" cy="9" r="1.5" fill="var(--cm)" stroke="none"/><circle cx="13" cy="15" r="1.5" fill="var(--cm)" stroke="none"/><circle cx="19" cy="9" r="1.5" fill="var(--cm)" stroke="none"/></svg></div>
+        </div>
+        <div class="sv-card-body">
+          <h3 class="sv-title">Rehabilitación Oral</h3>
+          <p class="sv-desc">Restauración funcional y estética para pacientes con pérdidas dentales significativas. Devolvemos la salud y apariencia natural de tu boca.</p>
+          <a href="#booking" class="sv-lnk">Agendar →</a>
+        </div>
+      </div>
+
+    </div><!-- /sv-track -->
+  </div><!-- /sv-viewport -->
+
+    <!-- RIGHT hover zone -->
+    <div class="sv-zone sv-zone-right" id="svZoneR">
+      <div class="sv-zone-btn">
+        <svg viewBox="0 0 22 22"><path d="M9 5l6 6-6 6"/></svg>
+      </div>
+    </div>
+
+  </div><!-- /sv-carousel-wrap -->
+
+  <!-- dots -->
+  <div class="sv-dots" id="svDots"></div>
+</section>
+
+<!-- TEAM -->
+<section id="team" class="section-wrap">
+  <div class="tm-hdr">
+    <div>
+      <span class="ey">Nuestros especialistas</span>
+      <h2 class="st" id="tmTitle">El equipo detrás de<br><em>cada sonrisa.</em></h2>
+      <p class="tm-sub">Haz clic en cualquier profesional para conocer su perfil y credenciales.</p>
+    </div>
+    <div class="tm-fil">
+      <button class="tm-fb act" data-tf="all">Todos</button>
+      <button class="tm-fb" data-tf="facial">Facial</button>
+      <button class="tm-fb" data-tf="dental">Dental</button>
+    </div>
+  </div>
+  <div class="tm-grid" id="tgrid">
+    <div class="tc" data-tcat="facial"
+      data-name="Dra. Isabel Abara" data-role="Estética Facial Avanzada · Directora"
+      data-tag="Directora de Clínica"
+      data-img="https://www.clinicablanc.cl/wp-content/uploads/2023/03/CursoMaster_retratos-65-scaled-e1678372906182.jpg"
+      data-ini=""
+      data-bio="La Dra. Isabel Abara egresó el año 2009 de la Universidad de los Andes y desde entonces ha dedicado su carrera al perfeccionamiento continuo en Estética Dental y Facial. Su dedicación y vocación en cada atención la convierten en una profesional excepcional, preocupada de cada detalle para lograr resultados armónicos que potencien la belleza natural de sus pacientes. Es la fundadora y directora de Clínica Blanc."
+      data-c1="Cirujano Dentista — Universidad de los Andes (2009)"
+      data-c2="Radióloga Oral y Maxilofacial"
+      data-c3="Máster en Armonización Orofacial"
+      data-c4="Diplomado en Estética y Rehabilitación Oral"
+      data-c5="Actualizaciones continuas desde 2010 — Hands-on, congresos y cursos internacionales">
+      <div class="tc-photo"><img src="https://www.clinicablanc.cl/wp-content/uploads/2023/03/CursoMaster_retratos-65-scaled-e1678372906182.jpg" alt="Dra. Isabel Abara"><span class="tc-badge">Directora</span></div>
+      <div class="tc-info"><div class="tc-name">Dra. Isabel Abara</div><div class="tc-role">Estética Facial Avanzada</div><button class="tc-btn">Ver perfil →</button></div>
+    </div>
+    <div class="tc" data-tcat="facial" data-name="Nayari Nivillac Gómez" data-role="Limpieza Facial & Peelings" data-tag="Especialista Facial" data-img="" data-ini="NN"
+      data-bio="Nayari es especialista en tratamientos de limpieza facial profunda y peelings químicos. Su enfoque personalizado garantiza que cada paciente reciba el tratamiento adecuado para su tipo de piel, logrando resultados visibles y duraderos en un ambiente de total confianza y profesionalismo."
+      data-c1="Especialista en Cosmetología Avanzada" data-c2="Certificación en Peelings Químicos — Grado I, II y III" data-c3="Formación en Hidratación y Nutrición Cutánea" data-c4="Actualización continua en protocolos de limpieza facial profesional">
+      <div class="tc-photo"><span class="tc-ini">NN</span><span class="tc-badge">Facial</span></div>
+      <div class="tc-info"><div class="tc-name">Nayari Nivillac</div><div class="tc-role">Limpieza Facial & Peelings</div><button class="tc-btn">Ver perfil →</button></div>
+    </div>
+    <div class="tc" data-tcat="dental" data-name="Dr. Sebastián Mella" data-role="Implantología & Rehabilitación Oral" data-tag="Especialista Dental" data-img="" data-ini="SM"
+      data-bio="El Dr. Sebastián Mella es especialista en implantología y rehabilitación oral con una sólida trayectoria en la restauración de sonrisas complejas. Su precisión quirúrgica le permite ofrecer soluciones integrales que combinan funcionalidad y estética de manera excepcional."
+      data-c1="Cirujano Dentista — Universidad de Chile" data-c2="Especialista en Implantología Oral" data-c3="Diplomado en Rehabilitación Oral Avanzada" data-c4="Membresía en la Sociedad de Implantología Oral de Chile">
+      <div class="tc-photo"><span class="tc-ini">SM</span><span class="tc-badge">Dental</span></div>
+      <div class="tc-info"><div class="tc-name">Dr. Sebastián Mella</div><div class="tc-role">Implantología & Rehabilitación</div><button class="tc-btn">Ver perfil →</button></div>
+    </div>
+    <div class="tc" data-tcat="dental" data-name="Dra. Claudia Vieyra" data-role="Ortodoncia" data-tag="Especialista Dental" data-img="" data-ini="CV"
+      data-bio="La Dra. Claudia Vieyra es ortodoncista con amplia experiencia en el diagnóstico y tratamiento de maloclusiones. Combina rigurosidad técnica con sensibilidad estética para lograr alineaciones armónicas que transforman la sonrisa y la calidad de vida de sus pacientes."
+      data-c1="Cirujana Dentista con especialidad en Ortodoncia" data-c2="Especialización en Ortodoncia Invisible y Alineadores" data-c3="Diplomado en Ortopedia Maxilofacial" data-c4="Actualización permanente en técnicas contemporáneas">
+      <div class="tc-photo"><span class="tc-ini">CV</span><span class="tc-badge">Dental</span></div>
+      <div class="tc-info"><div class="tc-name">Dra. Claudia Vieyra</div><div class="tc-role">Ortodoncia</div><button class="tc-btn">Ver perfil →</button></div>
+    </div>
+    <div class="tc" data-tcat="dental" data-name="Esteban Cortés Wilckens" data-role="Periodoncia" data-tag="Especialista Dental" data-img="" data-ini="EC"
+      data-bio="Esteban Cortés es especialista en periodoncia con un enfoque preventivo y terapéutico de las enfermedades de soporte dental. Su trabajo minucioso es la base sobre la que el equipo de Clínica Blanc construye tratamientos estéticos duraderos."
+      data-c1="Cirujano Dentista — especialización en Periodoncia" data-c2="Diplomado en Periodoncia Clínica e Implantes" data-c3="Formación en Cirugía Periodontal Avanzada" data-c4="Miembro activo de la Sociedad Chilena de Periodoncia">
+      <div class="tc-photo"><span class="tc-ini">EC</span><span class="tc-badge">Dental</span></div>
+      <div class="tc-info"><div class="tc-name">Esteban Cortés W.</div><div class="tc-role">Periodoncia</div><button class="tc-btn">Ver perfil →</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal-bg" id="mbg">
+  <div class="modal" id="mod">
+    <button class="mc" id="mclose">✕</button>
+    <div class="m-in">
+      <div class="m-ph" id="mph"><div class="m-pg"></div></div>
+      <div class="m-bd">
+        <div class="m-tag" id="mtag"></div>
+        <div class="m-nm" id="mnm"></div>
+        <div class="m-rl" id="mrl"></div>
+        <div class="m-dv"></div>
+        <p class="m-bio" id="mbio"></p>
+        <div class="m-crs" id="mcrs"></div>
+        <a href="https://5b546c960dc6644bc61fb6b25c751b3660be1896.agenda.softwaredentalink.com/agendas/agendamiento" target="_blank" class="m-bk">Agendar con este profesional →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="section-wrap">
+  <div class="tst-hdr">
+    <span class="ey">Lo que dicen nuestros pacientes</span>
+    <h2 class="st" id="tstTitle">Experiencias <em>reales.</em></h2>
+  </div>
+  <div class="tst-wrap"><div class="tst-track" id="ttrack">
+    <div class="tst-card"><div class="ts">★★★★★</div><p class="tt">"Llegué con dudas sobre el ácido hialurónico y la Dra. Abara me explicó todo con paciencia increíble. El resultado es natural y elegante — exactamente lo que buscaba."</p><div class="ta"><div class="tav">C</div><div><div class="tn">Catalina R.</div><div class="tsv">Ácido Hialurónico</div></div></div></div>
+    <div class="tst-card"><div class="ts">★★★★★</div><p class="tt">"Me hice los implantes con el Dr. Mella y estoy feliz. Todo fue muy claro, sin sorpresas. Siento que recuperé mi sonrisa completa."</p><div class="ta"><div class="tav">M</div><div><div class="tn">Marcela V.</div><div class="tsv">Implantología</div></div></div></div>
+    <div class="tst-card"><div class="ts">★★★★★</div><p class="tt">"Vine por la limpieza facial y me quedé encantada con Nayari. El ambiente es tranquilo y elegante. Ya agendé mi próxima sesión de peeling."</p><div class="ta"><div class="tav">S</div><div><div class="tn">Sofía P.</div><div class="tsv">Limpieza Facial & Peeling</div></div></div></div>
+    <div class="tst-card"><div class="ts">★★★★★</div><p class="tt">"Llevaba años postergando la ortodoncia. Con la Dra. Vieyra encontré la confianza que necesitaba. El seguimiento es impecable."</p><div class="ta"><div class="tav">A</div><div><div class="tn">Andrés L.</div><div class="tsv">Ortodoncia</div></div></div></div>
+    <div class="tst-card"><div class="ts">★★★★★</div><p class="tt">"Me regalaron un gift card y fue una experiencia preciosa. La clínica es hermosa, el trato es excepcional. Lo recomendaría mil veces."</p><div class="ta"><div class="tav">V</div><div><div class="tn">Valentina O.</div><div class="tsv">Gift Card — Bioestimuladores</div></div></div></div>
+  </div></div>
+  <div class="tst-nav" id="tnav"><button class="td act" data-ti="0"></button><button class="td" data-ti="1"></button><button class="td" data-ti="2"></button></div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking" class="section-wrap">
+  <div class="bk-t">
+    <span class="ey">Agenda tu evaluación</span>
+    <h2 class="st">Tu consulta,<br><em>en tres pasos.</em></h2>
+    <p>El agendamiento toma menos de 2 minutos.</p>
+    <div class="bk-steps">
+      <div class="bk-step"><div class="sn">1</div><div><div class="s-tt">Elige tu especialidad</div><div class="s-ds">Estética facial, odontología o tratamiento específico.</div></div></div>
+      <div class="bk-step"><div class="sn">2</div><div><div class="s-tt">Selecciona tu profesional</div><div class="s-ds">Elige horario disponible en nuestro sistema online.</div></div></div>
+      <div class="bk-step"><div class="sn">3</div><div><div class="s-tt">Confirma y listo</div><div class="s-ds">Serás redirigido al pago para confirmar tu reserva.</div></div></div>
+    </div>
+  </div>
+  <div class="bk-form">
+    <div class="bf-title">Reserva tu hora</div>
+    <div class="bf-sub">Completa el formulario y te contactamos para confirmar.</div>
+    <div class="fg"><label class="fl">Nombre completo</label><input type="text" class="fi" placeholder="Tu nombre"></div>
+    <div class="fg"><label class="fl">Teléfono / WhatsApp</label><input type="tel" class="fi" placeholder="+56 9 xxxx xxxx"></div>
+    <div class="fg"><label class="fl">Especialidad</label>
+      <div class="fsw"><select class="fs"><option value="">Selecciona una especialidad</option>
+        <optgroup label="Estética Facial"><option>Ácido Hialurónico</option><option>Bioestimuladores</option><option>Toxina Botulínica</option><option>Adipoestructuración</option><option>Peelings</option><option>Limpieza Facial</option></optgroup>
+        <optgroup label="Odontología"><option>Implantología</option><option>Ortodoncia</option><option>Periodoncia</option><option>Rehabilitación Oral</option><option>Odontología General</option></optgroup>
+      </select></div>
+    </div>
+    <div class="fg"><label class="fl">Profesional (opcional)</label>
+      <div class="fsw"><select class="fs"><option value="">Sin preferencia</option><option>Dra. Isabel Abara</option><option>Nayari Nivillac</option><option>Dr. Sebastián Mella</option><option>Dra. Claudia Vieyra</option><option>Esteban Cortés W.</option></select></div>
+    </div>
+    <button class="fb" onclick="window.open('https://5b546c960dc6644bc61fb6b25c751b3660be1896.agenda.softwaredentalink.com/agendas/agendamiento','_blank')">Agendar evaluación →</button>
+  </div>
+</section>
+
+<!-- GIFT CARD -->
+<section id="giftcard" class="section-wrap">
+  <div class="gf-t">
+    <span class="ey">Regalo perfecto</span>
+    <h2 class="st">Regala una<br><em>experiencia</em><br>de bienestar.</h2>
+    <p>Elige el servicio, completa los datos y nos encargamos del resto.</p>
+    <p><strong>Todos los certificados tienen validez de 6 meses desde la compra.</strong></p>
+    <a href="https://wa.link/pb6r55" class="gf-btn" target="_blank">Quiero regalar esto →</a>
+  </div>
+  <div class="gf-vis">
+    <div class="gf-card"><div class="gf-shine"></div>
+      <div class="gc-logo">BLANC</div>
+      <div class="gc-amt"><span>$</span>—</div>
+      <div class="gc-lbl">Certificado de regalo · Bienestar facial</div>
+      <div class="gc-bot"><div class="gc-val">Válido por 6 meses</div><div class="gc-dots"><div class="gc-dot"></div><div class="gc-dot"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section-wrap">
+  <div class="ct-in">
+    <span class="ey">Contáctanos</span>
+    <h2 class="st">¿Tienes dudas?<br><em>Con gusto te orientamos.</em></h2>
+    <p class="ct-sub">Escríbenos por WhatsApp, síguenos en Instagram o usa el formulario de agendamiento.</p>
+    <div class="ct-ch">
+      <a href="https://api.whatsapp.com/send?phone=56991838880&text=Hola!" target="_blank" class="ct-a"><div class="ct-ico">💬</div><div><div class="ct-lbl">WhatsApp</div><div class="ct-val">+56 9 9183 8880</div></div></a>
+      <a href="https://www.instagram.com/clinica.blanc/" target="_blank" class="ct-a"><div class="ct-ico">📷</div><div><div class="ct-lbl">Instagram</div><div class="ct-val">@clinica.blanc</div></div></a>
+      <a href="#booking" class="ct-a"><div class="ct-ico">📅</div><div><div class="ct-lbl">Agenda online</div><div class="ct-val">Reserva tu hora</div></div></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="section-wrap">
+  <div class="ft-in">
+    <div><span class="ft-logo">BLANC</span><p>Centro integral de estética facial avanzada y odontología de especialidad en Santiago, Chile.</p></div>
+    <div class="ft-col"><h4>Tratamientos</h4><ul><li><a href="#services">Ácido Hialurónico</a></li><li><a href="#services">Bioestimuladores</a></li><li><a href="#services">Toxina Botulínica</a></li><li><a href="#services">Implantología</a></li><li><a href="#services">Ortodoncia</a></li></ul></div>
+    <div class="ft-col"><h4>Clínica</h4><ul><li><a href="#about">La Clínica</a></li><li><a href="#team">Nuestro equipo</a></li><li><a href="#booking">Agendar</a></li><li><a href="#giftcard">Gift Card</a></li><li><a href="#contact">Contacto</a></li></ul></div>
+  </div>
+  <div class="ft-bot"><span class="ft-copy">© 2025 Clínica Blanc. Santiago, Chile.</span><div class="ft-soc"><a href="https://www.instagram.com/clinica.blanc/" target="_blank">IG</a><a href="https://api.whatsapp.com/send?phone=56991838880" target="_blank">WA</a></div></div>
+</footer>
+
+<!-- WA -->
+<a href="https://api.whatsapp.com/send?phone=56991838880&text=Hola!" target="_blank" class="wa"><div class="wa-b"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.107.548 4.088 1.512 5.81L.058 23.556a.5.5 0 00.611.61l5.82-1.447A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.805 9.805 0 01-5.002-1.368l-.358-.214-3.714.924.951-3.626-.234-.372A9.778 9.778 0 012.182 12C2.182 6.571 6.571 2.182 12 2.182S21.818 6.571 21.818 12 17.429 21.818 12 21.818z"/></svg></div></a>
+
+<script>
+/* ══════════════════════════════════════════════
+   PAGE LOADER
+══════════════════════════════════════════════ */
+const loader = document.getElementById('loader');
+const llogo  = document.getElementById('llogo');
+const lline  = document.getElementById('lline');
+
+// Animate loader
+gsap.timeline()
+  .to(llogo, {opacity:1, duration:.6, ease:'power2.out'})
+  .to(lline, {width:'100%', duration:.9, ease:'power2.inOut'}, '+=.2')
+  .to(loader, {yPercent:-100, duration:.9, ease:'power3.inOut', delay:.3,
+    onComplete:()=>{ loader.style.display='none'; }
+  })
+  .from('#hero .h-content', {y:0}, '<'); // sync
+
+/* ══════════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════════ */
+const C=document.getElementById('C'), CR=document.getElementById('CR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;C.style.left=mx+'px';C.style.top=my+'px'});
+(function a(){rx+=(mx-rx)*.09;ry+=(my-ry)*.09;CR.style.left=rx+'px';CR.style.top=ry+'px';requestAnimationFrame(a)})();
+document.querySelectorAll('a,button,.sv-card,.tc').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{C.classList.add('hv');CR.classList.add('hv')});
+  el.addEventListener('mouseleave',()=>{C.classList.remove('hv');CR.classList.remove('hv')});
+});
+
+/* ══════════════════════════════════════════════
+   NAV
+══════════════════════════════════════════════ */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('sc',scrollY>80));
+const hb=document.getElementById('hb'),nov=document.getElementById('nov');
+let no=false;
+hb.addEventListener('click',()=>{
+  no=!no;nov.classList.toggle('open',no);
+  hb.children[0].style.transform=no?'rotate(45deg) translate(5px,5px)':'';
+  hb.children[1].style.opacity=no?'0':'1';
+  hb.children[2].style.transform=no?'rotate(-45deg) translate(5px,-5px)':'';
+});
+document.querySelectorAll('.nol').forEach(l=>l.addEventListener('click',()=>{no=false;nov.classList.remove('open');hb.children[0].style.transform='';hb.children[1].style.opacity='1';hb.children[2].style.transform=''}));
+
+/* ══════════════════════════════════════════════
+   GSAP SCROLL ANIMATIONS
+   — Section entrances with clip-path + parallax
+   — Inter-section wipe transitions
+══════════════════════════════════════════════ */
+gsap.registerPlugin(ScrollTrigger);
+
+/* Helper: cinematic text reveal (chars split by word) */
+function revealText(el, delay=0){
+  gsap.from(el, {
+    y: 40, opacity:0, duration:1.1,
+    ease:'power3.out', delay,
+    scrollTrigger:{trigger:el, start:'top 85%', once:true}
+  });
+}
+
+/* ── MARQUEE enter ── */
+gsap.from('#smq', {
+  yPercent:30, opacity:0, duration:1,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#smq', start:'top 95%', once:true}
+});
+
+/* ── ABOUT ── */
+gsap.from('#aImgs', {
+  x:-60, opacity:0, duration:1.2,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#about', start:'top 75%', once:true}
+});
+gsap.from('#aTxt', {
+  x:60, opacity:0, duration:1.2,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#about', start:'top 75%', once:true}
+});
+// subtle parallax on about images
+gsap.to('#aImgs .a-main img', {
+  yPercent:-12,
+  ease:'none',
+  scrollTrigger:{trigger:'#about', start:'top bottom', end:'bottom top', scrub:1.5}
+});
+
+/* ── TEAM — dark section slides in over services ── */
+gsap.from('#team', {
+  clipPath:'inset(4% 0 0 0)',
+  opacity:0,
+  duration:1.3,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#team', start:'top 88%', once:true}
+});
+gsap.from('#tmTitle', {y:30, opacity:0, duration:1.1, ease:'power3.out', scrollTrigger:{trigger:'#team', start:'top 75%', once:true}});
+gsap.from('.tc', {
+  y:40, opacity:0, duration:.8,
+  stagger:{amount:.5},
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#tgrid', start:'top 82%', once:true}
+});
+
+/* ── TESTIMONIALS ── */
+gsap.from('#testimonials', {
+  clipPath:'inset(4% 0 0 0)',
+  opacity:0,
+  duration:1.3,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#testimonials', start:'top 88%', once:true}
+});
+gsap.from('#tstTitle', {y:25, opacity:0, duration:1, ease:'power3.out', scrollTrigger:{trigger:'#testimonials', start:'top 78%', once:true}});
+gsap.from('.tst-card', {
+  y:40, opacity:0, duration:.85,
+  stagger:.12,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'.tst-wrap', start:'top 82%', once:true}
+});
+
+/* ── BOOKING — left/right split ── */
+gsap.from('.bk-t', {
+  x:-50, opacity:0, duration:1.2,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#booking', start:'top 78%', once:true}
+});
+gsap.from('.bk-form', {
+  x:50, opacity:0, duration:1.2,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#booking', start:'top 78%', once:true}
+});
+
+/* ── GIFT CARD ── */
+gsap.from('.gf-t', {
+  x:-50, opacity:0, duration:1.2,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#giftcard', start:'top 80%', once:true}
+});
+gsap.from('.gf-vis', {
+  x:50, opacity:0, rotateY:15, duration:1.3,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#giftcard', start:'top 80%', once:true}
+});
+
+/* ── CONTACT cards ── */
+gsap.from('.ct-in', {
+  y:40, opacity:0, duration:1,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'#contact', start:'top 80%', once:true}
+});
+gsap.from('.ct-a', {
+  y:30, opacity:0, duration:.75,
+  stagger:.1,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'.ct-ch', start:'top 85%', once:true}
+});
+
+/* ── FOOTER ── */
+gsap.from('footer .ft-in', {
+  y:40, opacity:0, duration:1,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'footer', start:'top 85%', once:true}
+});
+
+/* ── BOOKING STEPS stagger ── */
+gsap.from('.bk-step', {
+  x:-30, opacity:0, duration:.75,
+  stagger:.15,
+  ease:'power3.out',
+  scrollTrigger:{trigger:'.bk-steps', start:'top 80%', once:true}
+});
+
+/* ── Hero parallax on scroll ── */
+ScrollTrigger.create({
+  trigger:'#hero', start:'top top', end:'bottom top', scrub:true,
+  onUpdate:(self)=>{
+    const img = document.getElementById('heroImg');
+    if(img) img.style.transform = `scale(1) translateY(${self.progress * 18}%)`;
+  }
+});
+
+/* ══════════════════════════════════════════════
+   SERVICES CAROUSEL ENGINE v2
+   — Mouse proximity auto-scroll at edges
+   — Drag with GSAP momentum
+   — Hover zone buttons (left / right)
+   — Edge fade masks update on position
+   — Filter rebuild
+══════════════════════════════════════════════ */
+(function(){
+  const wrap      = document.getElementById('svWrap');
+  const viewport  = document.getElementById('svViewport');
+  const track     = document.getElementById('svTrack');
+  const fill      = document.getElementById('svFill');
+  const dotsWrap  = document.getElementById('svDots');
+  const prevBtn   = document.getElementById('svPrev');
+  const nextBtn   = document.getElementById('svNext');
+  const zoneL     = document.getElementById('svZoneL');
+  const zoneR     = document.getElementById('svZoneR');
+
+  const CARD_W  = 340;
+  const CARD_GAP= 20;
+  const STEP    = CARD_W + CARD_GAP;
+
+  /* speed for proximity scroll: px/frame */
+  const PROX_MAX_SPEED = 6;
+
+  let allCards  = Array.from(track.querySelectorAll('.sv-card'));
+  let visCards  = [...allCards];
+  let curX      = 0;   // actual rendered X (continuous, not snapped)
+  let targetSnap= 0;   // snapped target in px (negative)
+  let snapIdx   = 0;
+  let raf       = null;
+
+  /* drag state */
+  let dragging      = false;
+  let dragStartX    = 0;
+  let dragStartCurX = 0;
+  let velX          = 0;
+  let lastMouseX    = 0;
+  let lastDragT     = 0;
+
+  /* proximity scroll state */
+  let proxDir       = 0;   // -1 left, 0 none, 1 right
+  let proxSpeed     = 0;   // px per frame 0..PROX_MAX_SPEED
+  let proxActive    = false;  // mouse is over a zone
+
+  /* ── HELPERS ── */
+  function visiblePx(){ return viewport.offsetWidth - 12*16; } // exclude padding
+  function maxX(){ return -Math.max(0, visCards.length * STEP - CARD_GAP - visiblePx()); }
+  function clamp(v,min,max){ return Math.min(max,Math.max(min,v)); }
+
+  function setX(x){
+    curX = x;
+    gsap.set(track,{x:curX});
+  }
+
+  function snapToNearest(){
+    snapIdx = Math.round(-curX / STEP);
+    snapIdx = clamp(snapIdx, 0, visCards.length - 1);
+    targetSnap = -snapIdx * STEP;
+    gsap.to(track,{x:targetSnap,duration:.65,ease:'power3.out',overwrite:true,
+      onUpdate:()=>{ curX = gsap.getProperty(track,'x'); updateEdges(); }
+    });
+    curX = targetSnap;
+    updateDots();
+    updateProgress();
+    updateActiveCard();
+    updateEdges();
+  }
+
+  function goTo(idx, animate=true){
+    snapIdx = clamp(idx, 0, Math.max(0, visCards.length-1));
+    targetSnap = -snapIdx * STEP;
+    if(animate){
+      gsap.to(track,{x:targetSnap,duration:.65,ease:'power3.out',overwrite:true,
+        onUpdate:()=>{ curX=gsap.getProperty(track,'x'); updateEdges(); }
+      });
+    } else {
+      gsap.set(track,{x:targetSnap});
+    }
+    curX = targetSnap;
+    updateDots();
+    updateProgress();
+    updateActiveCard();
+    updateEdges();
+  }
+
+  function updateEdges(){
+    /* left fade: hide when fully at start (curX >= 0) */
+    wrap.classList.toggle('at-start', curX >= -4);
+    /* right fade: hide when fully at end */
+    wrap.classList.toggle('at-end', curX <= maxX() + 4);
+    /* also disable header arrow buttons */
+    if(prevBtn) prevBtn.disabled = curX >= -4;
+    if(nextBtn) nextBtn.disabled = curX <= maxX() + 4;
+  }
+
+  function updateDots(){
+    document.querySelectorAll('.sv-dot').forEach((d,i)=>d.classList.toggle('act',i===snapIdx));
+  }
+
+  function updateProgress(){
+    const total = Math.max(1, visCards.length - 1);
+    fill.style.width = (snapIdx / total * 100) + '%';
+  }
+
+  function updateActiveCard(){
+    visCards.forEach((c,i)=>c.classList.toggle('active-card', i===snapIdx));
+  }
+
+  function buildDots(){
+    dotsWrap.innerHTML='';
+    const n = visCards.length;
+    for(let i=0;i<n;i++){
+      const d=document.createElement('button');
+      d.className='sv-dot'+(i===0?' act':'');
+      d.dataset.i=i;
+      d.addEventListener('click',()=>goTo(i));
+      dotsWrap.appendChild(d);
+    }
+  }
+
+  /* ── PROXIMITY SCROLL LOOP ── */
+  function proximityLoop(){
+    if(!proxActive){ raf=null; return; }
+    if(proxDir!==0 && proxSpeed>0){
+      const next = curX + proxDir * proxSpeed;
+      const clamped = clamp(next, maxX(), 0);
+      gsap.set(track,{x:clamped});
+      curX = clamped;
+      updateEdges();
+      /* update snap idx in real time while scrolling */
+      const si = clamp(Math.round(-curX/STEP),0,visCards.length-1);
+      if(si!==snapIdx){
+        snapIdx=si;
+        updateDots();
+        updateProgress();
+        updateActiveCard();
+      }
+    }
+    raf = requestAnimationFrame(proximityLoop);
+  }
+
+  function startProx(dir, speed){
+    proxDir=dir; proxSpeed=speed; proxActive=true;
+    if(!raf) raf=requestAnimationFrame(proximityLoop);
+  }
+  function stopProx(){
+    proxActive=false; proxDir=0; proxSpeed=0;
+    if(raf){ cancelAnimationFrame(raf); raf=null; }
+    snapToNearest();
+  }
+
+  /* ── HOVER ZONES — mouse proximity ── */
+  /* We listen on the full section for mousemove and compute distance from edges */
+  const SV = document.getElementById('services');
+
+  SV.addEventListener('mousemove', e=>{
+    if(dragging) return;
+    const rect = viewport.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const w    = rect.width;
+    const ZONE = 160; // px zone width on each side
+
+    if(relX < ZONE && relX >= 0){
+      /* left zone: speed proportional to how close to edge */
+      const ratio = 1 - (relX / ZONE);
+      startProx(1, ratio * PROX_MAX_SPEED); // +1 = move right (reveal left cards)
+    } else if(relX > w - ZONE && relX <= w){
+      /* right zone */
+      const ratio = 1 - ((w - relX) / ZONE);
+      startProx(-1, ratio * PROX_MAX_SPEED);
+    } else {
+      if(proxActive) stopProx();
+    }
+  });
+
+  SV.addEventListener('mouseleave', ()=>{ if(proxActive) stopProx(); });
+
+  /* ── ZONE CLICK BUTTONS ── */
+  zoneL.addEventListener('click', ()=> goTo(snapIdx - 1));
+  zoneR.addEventListener('click', ()=> goTo(snapIdx + 1));
+
+  /* ── HEADER ARROWS ── */
+  if(prevBtn) prevBtn.addEventListener('click',()=>goTo(snapIdx-1));
+  if(nextBtn) nextBtn.addEventListener('click',()=>goTo(snapIdx+1));
+
+  /* ── DRAG — mouse ── */
+  viewport.addEventListener('mousedown',e=>{
+    if(e.target.closest('.sv-zone')) return;
+    dragging=true;
+    dragStartX=e.clientX;
+    dragStartCurX=curX;
+    velX=0; lastMouseX=e.clientX; lastDragT=Date.now();
+    viewport.classList.add('dragging');
+    gsap.killTweensOf(track);
+    if(proxActive) stopProx();
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    const now=Date.now(), dt=now-lastDragT||1;
+    velX=(e.clientX-lastMouseX)/dt*14;
+    lastMouseX=e.clientX; lastDragT=now;
+    const raw=dragStartCurX+(e.clientX-dragStartX);
+    curX=clamp(raw,maxX()-40,40);
+    gsap.set(track,{x:curX});
+    updateEdges();
+  });
+  window.addEventListener('mouseup',()=>{
+    if(!dragging) return;
+    dragging=false;
+    viewport.classList.remove('dragging');
+    /* momentum */
+    const proj=curX+velX*5;
+    const si=clamp(Math.round(-proj/STEP),0,visCards.length-1);
+    goTo(si);
+  });
+
+  /* ── TOUCH ── */
+  let touchSX=0,touchSCX=0;
+  viewport.addEventListener('touchstart',e=>{
+    touchSX=e.touches[0].clientX;touchSCX=curX;
+    gsap.killTweensOf(track);
+  },{passive:true});
+  viewport.addEventListener('touchmove',e=>{
+    const dx=e.touches[0].clientX-touchSX;
+    curX=clamp(touchSCX+dx,maxX()-30,30);
+    gsap.set(track,{x:curX});
+    updateEdges();
+  },{passive:true});
+  viewport.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-touchSX;
+    const si=clamp(Math.round(-(touchSCX+dx)/STEP),0,visCards.length-1);
+    goTo(si);
+  });
+
+  /* ── KEYBOARD ── */
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight') goTo(snapIdx+1);
+    if(e.key==='ArrowLeft')  goTo(snapIdx-1);
+  });
+
+  /* ── FILTER ── */
+  document.querySelectorAll('.sv-tab').forEach(t=>{
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.sv-tab').forEach(x=>x.classList.remove('act'));
+      this.classList.add('act');
+      const f=this.dataset.f;
+      gsap.to(allCards,{opacity:0,duration:.2,onComplete:()=>{
+        allCards.forEach(c=>{
+          const show=f==='all'||c.dataset.cat===f;
+          c.style.display=show?'flex':'none';
+        });
+        visCards=allCards.filter(c=>c.style.display!=='none');
+        snapIdx=0;curX=0;
+        gsap.set(track,{x:0});
+        buildDots();updateProgress();updateActiveCard();updateEdges();
+        gsap.to(visCards,{opacity:1,y:0,duration:.45,stagger:.04,ease:'power2.out'});
+      }});
+    });
+  });
+
+  /* ── GSAP SCROLL ENTRANCE ── */
+  gsap.from('#services',{
+    clipPath:'inset(5% 0 0 0)',opacity:0,duration:1.3,ease:'power3.out',
+    scrollTrigger:{trigger:'#services',start:'top 88%',once:true}
+  });
+  gsap.from('#svEy',{y:20,opacity:0,duration:.9,ease:'power3.out',
+    scrollTrigger:{trigger:'#services',start:'top 75%',once:true}});
+  gsap.from('#svTitle',{y:30,opacity:0,duration:1.1,ease:'power3.out',delay:.1,
+    scrollTrigger:{trigger:'#services',start:'top 75%',once:true}});
+  gsap.from(allCards,{
+    y:50,opacity:0,duration:.8,stagger:{amount:.7,from:'start'},ease:'power3.out',
+    scrollTrigger:{trigger:'#services',start:'top 80%',once:true,
+      onEnter:()=>{buildDots();updateProgress();updateActiveCard();updateEdges();}
+    }
+  });
+
+  /* ── INIT ── */
+  buildDots();
+  updateProgress();
+  updateActiveCard();
+  updateEdges();
+  window.addEventListener('resize',()=>{ buildDots(); goTo(snapIdx,false); updateEdges(); });
+
+})();
+
+/* ══════════════════════════════════════════════
+   TEAM FILTER
+══════════════════════════════════════════════ */
+document.querySelectorAll('.tm-fb').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.tm-fb').forEach(x=>x.classList.remove('act'));
+    this.classList.add('act');
+    const f=this.dataset.tf;
+    document.querySelectorAll('.tc').forEach(c=>c.style.display=(f==='all'||c.dataset.tcat===f)?'':'none');
+  });
+});
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+const mbg=document.getElementById('mbg');
+function openModal(card){
+  const d=card.dataset;
+  document.getElementById('mtag').textContent=d.tag||'Especialista';
+  document.getElementById('mnm').textContent=d.name;
+  document.getElementById('mrl').textContent=d.role;
+  document.getElementById('mbio').textContent=d.bio;
+  const ph=document.getElementById('mph');
+  ph.innerHTML='<div class="m-pg"></div>';
+  if(d.img){const img=document.createElement('img');img.src=d.img;img.alt=d.name;ph.insertBefore(img,ph.firstChild);}
+  else{const ini=document.createElement('div');ini.className='m-pi';ini.textContent=d.ini;ph.insertBefore(ini,ph.firstChild);}
+  const cr=document.getElementById('mcrs');cr.innerHTML='';
+  ['c1','c2','c3','c4','c5'].forEach(k=>{if(d[k]){const div=document.createElement('div');div.className='m-cr';div.textContent=d[k];cr.appendChild(div);}});
+  mbg.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeModal(){mbg.classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.tc-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openModal(b.closest('.tc'))}));
+document.querySelectorAll('.tc').forEach(c=>c.addEventListener('click',()=>openModal(c)));
+document.getElementById('mclose').addEventListener('click',closeModal);
+mbg.addEventListener('click',e=>{if(e.target===mbg)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ══════════════════════════════════════════════
+   TESTIMONIALS CAROUSEL
+══════════════════════════════════════════════ */
+let tc2=0;
+const ttrack=document.getElementById('ttrack');
+const tdots=document.querySelectorAll('.td');
+const tcards=document.querySelectorAll('.tst-card');
+const pv=()=>window.innerWidth<700?1:window.innerWidth<1000?2:3;
+function mvTo(i){
+  const pw=tcards[0].offsetWidth+24;
+  tc2=Math.max(0,Math.min(i,tcards.length-pv()));
+  gsap.to(ttrack,{x:-(tc2*pw),duration:.75,ease:'power3.out'});
+  tdots.forEach((d,j)=>d.classList.toggle('act',j===tc2));
+}
+tdots.forEach(d=>d.addEventListener('click',()=>mvTo(+d.dataset.ti)));
+setInterval(()=>mvTo((tc2+1)%(tcards.length-pv()+1)),5000);
+</script>
+</body>
+</html>
